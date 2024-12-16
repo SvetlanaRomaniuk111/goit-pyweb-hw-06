@@ -104,4 +104,36 @@ JOIN teachers t ON t.id = sb.teacher_id
 WHERE s.id = 25 AND t.id = 2
 ORDER BY sb.name;
 
+--add_1-Середній бал, який певний викладач ставить певному студентові.
+SELECT 
+	t.fullname AS teacher,
+	s.fullname AS student,
+	ROUND(AVG(gr.grade), 2) AS average_grade
+FROM teachers t
+JOIN subjects sb ON t.id = sb.teacher_id
+JOIN grades gr ON sb.id = gr.subject_id
+JOIN students s ON s.id = gr.student_id
+WHERE t.id = 3 AND s.id = 15
+GROUP BY t.fullname , s.fullname;
 	
+--add_2-Оцінки студентів у певній групі з певного предмета на останньому занятті.
+WITH LastLessonDate AS (
+	SELECT
+		MAX(gr.grade_date) AS last_date
+FROM grades gr
+JOIN students s ON s.id = gr.student_id
+WHERE s.group_id = 3 AND gr.subject_id = 2
+)
+SELECT 
+	g.name AS group_name,
+	s.fullname AS student_name, 
+	sb.name AS subject, 
+	gr.grade AS grade, 
+	gr.grade_date AS grade_date
+FROM grades gr
+JOIN students s ON gr.student_id = s.id 
+JOIN subjects sb ON gr.subject_id = sb.id
+JOIN groups g ON s.group_id = g.id
+JOIN LastLessonDate ll ON gr.grade_date = ll.last_date
+WHERE s.group_id = 3 AND gr.subject_id = 2
+ORDER BY s.fullname;
